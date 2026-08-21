@@ -1,11 +1,14 @@
 import express from "express";
+import swaggerUi from "swagger-ui-express";
+import swaggerOutput from "../swagger_output.json";
 
 const app = express();
 const PORT = 3000;
 
 // Middleware para leer JSON
 app.use(express.json());
-
+/* Swagger */
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerOutput));
 // Interface Estudiante
 interface Estudiante {
   id: number;
@@ -21,6 +24,7 @@ const estudiantes: Estudiante[] = [];
 // GET - Obtener estudiantes
 // ==============================
 app.get("/api/estudiantes", (req, res) => {
+  // #swagger.description = 'Obtiene la lista de estudiantes'
   res.status(200).json(estudiantes);
 });
 
@@ -28,6 +32,7 @@ app.get("/api/estudiantes", (req, res) => {
 // POST - Crear estudiante
 // ==============================
 app.post("/api/estudiantes", (req, res) => {
+  // #swagger.description = 'Crea un nuevo estudiante'
   const { nombre, email, bootcamp } = req.body;
 
   if (!email) {
@@ -52,6 +57,7 @@ app.post("/api/estudiantes", (req, res) => {
 // PUT - Actualizar estudiante
 // ==============================
 app.put("/api/estudiantes/:id", (req, res) => {
+  // #swagger.description = 'Actualiza un estudiante existente'
   const id = Number(req.params.id);
 
   const estudiante = estudiantes.find(
@@ -77,6 +83,7 @@ app.put("/api/estudiantes/:id", (req, res) => {
 // DELETE - Eliminar estudiante
 // ==============================
 app.delete("/api/estudiantes/:id", (req, res) => {
+  // #swagger.description = 'Elimina un estudiante'
   const id = Number(req.params.id);
 
   const indice = estudiantes.findIndex(
