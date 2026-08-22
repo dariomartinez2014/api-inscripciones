@@ -1,12 +1,16 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import swaggerOutput from "../swagger_output.json";
+import cors from "cors";
 
 const app = express();
-const PORT = 3000;
 
+const PORT = process.env.PORT ?? 3000;
+
+app.use(cors());
 // Middleware para leer JSON
 app.use(express.json());
+
 /* Swagger */
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerOutput));
 // Interface Estudiante
@@ -20,20 +24,33 @@ interface Estudiante {
 // Arreglo en memoria
 const estudiantes: Estudiante[] = [];
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    mensaje: "API funcionando correctamente",
+  });
+});
+
 // ==============================
 // GET - Obtener estudiantes
 // ==============================
-app.get("/api/estudiantes", (req, res) => {
-  // #swagger.description = 'Obtiene la lista de estudiantes'
-  res.status(200).json(estudiantes);
+app.get("/api/students", (req, res) => {
+  res.status(200).json(
+    estudiantes.map((estudiante) => ({
+      id: estudiante.id,
+      name: estudiante.nombre,
+      email: estudiante.email,
+      bootcamp: estudiante.bootcamp,
+    }))
+  );
 });
+
 
 // ==============================
 // POST - Crear estudiante
 // ==============================
-app.post("/api/estudiantes", (req, res) => {
+app.post(["/api/estudiantes", "/students", "/api/students"], (req, res) => {
   // #swagger.description = 'Crea un nuevo estudiante'
-  const { nombre, email, bootcamp } = req.body;
+ const { nombre, name, email, bootcamp } = req.body;
 
   if (!email) {
     return res.status(400).json({
@@ -43,7 +60,7 @@ app.post("/api/estudiantes", (req, res) => {
 
   const nuevoEstudiante: Estudiante = {
     id: estudiantes.length + 1,
-    nombre,
+    nombre: nombre ?? name,
     email,
     bootcamp,
   };
@@ -56,7 +73,9 @@ app.post("/api/estudiantes", (req, res) => {
 // ==============================
 // PUT - Actualizar estudiante
 // ==============================
-app.put("/api/estudiantes/:id", (req, res) => {
+app.put(
+  ["/api/estudiantes/:id", "/students/:id", "/api/students/:id"],
+  (req, res) => {
   // #swagger.description = 'Actualiza un estudiante existente'
   const id = Number(req.params.id);
 
@@ -70,11 +89,11 @@ app.put("/api/estudiantes/:id", (req, res) => {
     });
   }
 
-  const { nombre, email, bootcamp } = req.body;
+ const { nombre, name, email, bootcamp } = req.body;
 
-  estudiante.nombre = nombre;
-  estudiante.email = email;
-  estudiante.bootcamp = bootcamp;
+estudiante.nombre = nombre ?? name;
+estudiante.email = email;
+estudiante.bootcamp = bootcamp;
 
   res.status(200).json(estudiante);
 });
@@ -82,7 +101,7 @@ app.put("/api/estudiantes/:id", (req, res) => {
 // ==============================
 // DELETE - Eliminar estudiante
 // ==============================
-app.delete("/api/estudiantes/:id", (req, res) => {
+app.delete(["/api/estudiantes/:id", "/students/:id"], (req, res) => { 
   // #swagger.description = 'Elimina un estudiante'
   const id = Number(req.params.id);
 
